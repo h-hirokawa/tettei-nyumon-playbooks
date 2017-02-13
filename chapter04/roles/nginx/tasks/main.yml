@@ -1,0 +1,40 @@
+---
+- name: libselinux-pythonとEPELリポジトリをインストール
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - libselinux-python
+    - epel-release
+
+- name: Nginxのインストール
+  yum:
+    name: nginx
+    state: present
+
+- name: Nginxサービスの起動と自動起動設定
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: nginx.confテンプレートを展開
+  template:
+    src: nginx.j2.conf
+    dest: /etc/nginx/nginx.conf
+    validate: nginx -t -c %s
+  notify:
+    - Nginxサービスのリロード
+
+- name: Nginx用グループを作成
+  group:
+    name: "{{ nginx_group }}"
+    system: true
+
+- name: Nginx用ユーザーを作成
+  user:
+    name: "{{ nginx_user }}"
+    home: /var/lib/nginx
+    groups: "{{ nginx_group }}"
+    append: true
+    system: true

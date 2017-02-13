@@ -1,0 +1,26 @@
+---
+- name: Remiリポジトリをインストール
+  yum:
+    name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+- name: PHP-FPMと関連モジュールをインストール
+  yum:
+    name: "{{ item }}"
+    enablerepo: "remi-php{{ php_fpm_php_version|replace('.', '') }}"
+  with_items:
+    - php-fpm
+    - php-devel
+    - php-enchant
+    - php-mbstring
+    - php-process
+    - php-xml
+    - php-gd
+    - "{{ php_fpm_additional_packages }}"
+  notify:
+    - PHP-FPMを再起動
+
+- name: PHP-FPMの起動
+  service:
+    name: php-fpm
+    state: started
+    enabled: true

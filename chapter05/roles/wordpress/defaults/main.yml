@@ -1,0 +1,24 @@
+---
+wordpress_version: "4.7"
+wordpress_src_url: "https://ja.wordpress.org/wordpress-{{ wordpress_version }}-ja.tar.gz"
+wordpress_document_root: /srv
+wordpress_home: "{{ wordpress_document_root }}/wordpress"
+
+wordpress_port: 80
+wordpress_server_name: _
+
+wordpress_user: wordpress
+wordpress_group: wordpress
+
+wordpress_db_name: wordpress
+wordpress_db_host: localhost
+wordpress_db_user_name: wordpress
+wordpress_db_user_password:
+
+wordpress_nginx_user: nginx
+wordpress_nginx_group: nginx
+
+wordpress_nginx_config_dir: /etc/nginx/conf.d
+wordpress_php_fpm_config_dir: /etc/php-fpm.d
+
+wordpress_php_fpm_socket_path: /var/run/php-fpm/wordpress.sock

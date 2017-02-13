@@ -1,0 +1,38 @@
+---
+- name: MariaDB用Yumリポジトリを追加
+  yum_repository:
+    name: mariadb
+    description: MariaDB
+    baseurl: "http://yum.mariadb.org/{{ mariadb_version }}/centos7-amd64"
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: true
+
+- name: MariaDBサーバーと関連依存パッケージのインストール
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - MariaDB-server
+    - MariaDB-client
+    - MariaDB-devel
+    - MySQL-python
+
+- name: MariaDBサーバー起動と自動起動の有効化
+  service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: システム用データベースの作成
+  mysql_db:
+    name: "{{ item.name }}"
+    encoding: "{{ item.encoding|default('utf8') }}"
+    collation: "{{ item.collation|default('utf8_general_ci') }}"
+  with_items: "{{ mariadb_databases }}"
+
+- name: システム用ユーザーの作成
+  mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    host: "{{ item.host|default('localhost') }}"
+    priv: "{{ item.priv|default('') }}"
+  with_items: "{{ mariadb_users }}"

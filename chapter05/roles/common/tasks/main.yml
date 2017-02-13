@@ -1,0 +1,39 @@
+---
+- name: Python用SELinuxライブラリのインストール
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - libselinux-python
+    - policycoreutils-python
+
+- name: SELinuxの無力化
+  selinux:
+    policy: targeted
+    state: permissive
+  register: common_make_selinux_permissive
+
+- block:
+    - name: SELinux状態変更時に必要に応じてOSを再起動
+      shell: sleep 2 && shutdown -r now "Ansible reboot"
+      async: 1
+      poll: 0
+      changed_when: true
+
+    - name: 再起動完了まで待機
+      local_action: wait_for
+      args:
+        host: "{{ ansible_host|default(inventory_hostname) }}"
+        port: "{{ ansible_ssh_port|default(22) }}"
+        state: started
+        search_regex: OpenSSH
+        delay: 30
+        timeout: 600
+      become: false
+
+  when: common_make_selinux_permissive|changed and 'state change will take effect next reboot' in common_make_selinux_permissive.msg
+
+- name: ファイアウォールの有効化
+  service:
+    name: firewalld
+    state: started
+    enabled: true

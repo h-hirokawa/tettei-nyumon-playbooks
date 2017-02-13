@@ -1,0 +1,6 @@
+---
+- name: Playbookチュートリアル
+  hosts: all
+  become: true
+  roles:
+    - role: nginx

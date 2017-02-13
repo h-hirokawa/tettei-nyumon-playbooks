@@ -1,0 +1,84 @@
+---
+- name: Wordpressグループを作成
+  group:
+    name: "{{ wordpress_group }}"
+    system: true
+
+- name: Wordpressユーザーを作成
+  user:
+    name: "{{ wordpress_user }}"
+    home: "{{ wordpress_home }}"
+    shell: /sbin/nologin
+    groups: "{{ wordpress_group }}"
+    append: true
+    createhome: false
+    system: true
+
+- name: Wordpressのソースを展開
+  unarchive:
+    src: "{{ wordpress_src_url }}"
+    dest: "{{ wordpress_document_root }}"
+    remote_src: true
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_group }}"
+
+- block:
+    - name: 認証用ユニーク・キー・ファイルを読む
+      command: "cat {{ wordpress_home }}/unique_keys"
+      changed_when: false
+      run_once: true
+      delegate_to: "{{ ansible_play_hosts[0] }}"
+      register: cat_unique_keys
+  rescue:
+    - name: 認証用ユニーク・キーを取得
+      uri:
+        url: https://api.wordpress.org/secret-key/1.1/salt/
+        return_content: true
+      run_once: true
+      delegate_to: "{{ ansible_play_hosts[0] }}"
+      register: get_unique_keys
+  always:
+    - name: 認証用ユニーク・キー情報を変数に設定
+      set_fact:
+        wordpress_unique_keys: "{{ (get_unique_keys.content if cat_unique_keys|failed else cat_unique_keys.stdout)|trim }}"
+
+    - name: 認証用ユニーク・キーをファイルに保存
+      copy:
+        backup: true
+        content: "{{ wordpress_unique_keys }}"
+        dest: "{{ wordpress_home }}/unique_keys"
+
+- name: Wordpress設定ファイルを配置
+  template:
+    src: wp-config.j2.php
+    dest: "{{ wordpress_home }}/wp-config.php"
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_group }}"
+
+- name: PHP-FPM用設定ファイルを配置
+  template:
+    src: wordpress.fpm.j2.conf
+    dest: "{{ wordpress_php_fpm_config_dir }}/wordpress.conf"
+  notify:
+    - PHP-FPMを再起動
+
+- name: PHP-FPM設定ファイルをテスト
+  command: php-fpm -t
+  changed_when: false
+
+- name: Nginx用設定ファイルを配置
+  template:
+    src: wordpress.nginx.j2.conf
+    dest: "{{ wordpress_nginx_config_dir }}/wordpress.conf"
+  notify:
+    - Nginxサービスのリロード
+
+- name: Nginx設定ファイルをテスト
+  command: nginx -t
+  changed_when: false
+
+- name: FirewalldでWordpress稼働ポートを公開状態に設定
+  firewalld:
+    port: "{{ wordpress_port }}/tcp"
+    permanent: true
+    state: enabled

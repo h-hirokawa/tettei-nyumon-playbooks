@@ -1,0 +1,5 @@
+---
+nginx_user: nginx
+nginx_group: nginx
+nginx_config_dir: /etc/nginx/conf.d
+nginx_default_port: 80

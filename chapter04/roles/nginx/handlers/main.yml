@@ -1,0 +1,5 @@
+---
+- name: Nginxサービスのリロード
+  service:
+    name: nginx
+    state: reloaded

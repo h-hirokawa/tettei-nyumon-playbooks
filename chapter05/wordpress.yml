@@ -1,0 +1,44 @@
+---
+- name: CentOS 7上にWordpressをセットアップ
+  hosts: all
+  become: true
+  vars:
+    db_name: wordpress
+    db_user: wordpress
+    db_password: mysQ1InsecureP@ssw0rd
+  roles:
+    - name: common
+      tags:
+        - common
+    - name: mariadb
+      vars:
+        mariadb_databases:
+          - name: "{{ db_name }}"
+        mariadb_users:
+          - name: "{{ db_user }}"
+            password: "{{ db_password }}"
+            priv: "{{ db_name }}.*:ALL"
+      tags:
+        - mariadb
+    - name: php-fpm
+      vars:
+        php_fpm_additional_packages:
+          - php-mysqlnd
+      tags:
+        - php-fpm
+    - name: nginx
+      vars:
+        nginx_default_port: 8080
+      tags:
+        - nginx
+    - name: wordpress
+      vars:
+        wordpress_db_name: "{{ db_name }}"
+        wordpress_db_user_name: "{{ db_user }}"
+        wordpress_db_user_password: "{{ db_password }}"
+        wordpress_nginx_user: "{{ nginx_user }}"
+        wordpress_nginx_group: "{{ nginx_group }}"
+        wordpress_nginx_config_dir: "{{ nginx_config_dir }}"
+        wordpress_php_fpm_config_dir: "{{ php_fpm_config_dir }}"
+      tags:
+        - wordpress
