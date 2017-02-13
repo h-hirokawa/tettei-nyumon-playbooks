@@ -1,0 +1,20 @@
+---
+- hosts: webservers
+  serial: 5    (1)
+  pre_tasks:    (2)
+    - name: take out of load balancer pool
+      command: /usr/bin/take_out_of_pool {{ inventory_hostname }}    (3)
+      delegate_to: 127.0.0.1
+
+  roles:    (4)
+     - common
+     - webserver
+
+  tasks:
+     - script: /srv/qa_team/app_testing_script.sh --server {{ inventory_hostname }}   (5)
+       delegate_to: testing_server
+
+  post_tasks:    (6)
+    - name: add back to load balancer pool
+      command: /usr/bin/add_back_to_pool {{ inventory_hostname }}    (7)
+      delegate_to: 127.0.0.1

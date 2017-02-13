@@ -1,0 +1,15 @@
+---
+- hosts: master
+  become: true
+  gather_facts: false
+  tasks:
+  - name: Restart sshd
+    systemd: 
+      name: sshd
+      state: restarted
+
+  - name: Wait for ssh is available
+    wait_for: 
+      port: 22
+      search_regex: OpenSSH
+      delay: 5

@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Get facts of flavor
+      os_flavor_facts:
+        cloud: production
+        name: m1.large

@@ -1,0 +1,10 @@
+---
+
+- name: Create storage account
+  azure_rm_storageaccount:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    type: "{{ item.type }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_storage_account }}"

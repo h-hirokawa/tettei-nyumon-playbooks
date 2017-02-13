@@ -1,0 +1,11 @@
+---
+
+- include: resource-group.yml
+- include: virtual-network.yml
+- include: subnet.yml
+- include: public-ip.yml
+- include: security-group.yml
+- include: network-interface.yml
+- include: storage-account.yml
+- include: storage-container.yml
+- include: virtual-machine.yml

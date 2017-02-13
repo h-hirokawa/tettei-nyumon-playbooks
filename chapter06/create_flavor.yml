@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Create flavor t2.nano
+      os_nova_flavor:
+        cloud: production
+        state: present
+        name:  t2.nano
+        vcpus: 1
+        ram:   512
+        disk:  0

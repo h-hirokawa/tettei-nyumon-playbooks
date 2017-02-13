@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  connection: local    (1)
+  remote_user: root
+  roles:
+    - ansible-ci-testing    (2)

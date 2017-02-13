@@ -1,0 +1,28 @@
+---
+
+- name: Create VirtualMachine
+  azure_rm_virtualmachine:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    storage_account: "{{ item.storage_account }}"
+    storage_container_name: "{{ item.storage_container_name }}"
+    network_interfaces: "{{ item.network_interfaces }}"
+    vm_size: "{{ item.vm_size }}"
+    admin_username: "{{ item.admin_username }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ item.admin_username }}/.ssh/authorized_keys"
+        key_data: "{{ lookup('env', 'SSH_KEY_DATA') }}"
+    image:
+      offer: "{{ item.image.offer }}"
+      publisher: "{{ item.image.publisher }}"
+      sku: "{{ item.image.sku }}"
+      version: "{{ item.image.version }}"
+    tags:
+      env: staging
+      role: web
+  with_items:
+    - "{{ azure_virtual_machine }}"
+  register: azure_vm_result
+
+- debug: var=azure_vm_result

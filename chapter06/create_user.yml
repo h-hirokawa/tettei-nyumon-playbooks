@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: create user
+      os_user:
+        cloud: internal
+        name: testuser1
+        state: present
+        password: secret
+        email: testuser1@example.com
+        default_project: demo

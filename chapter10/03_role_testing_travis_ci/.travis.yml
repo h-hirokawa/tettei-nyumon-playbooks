@@ -1,0 +1,33 @@
+---
+language: python
+python: "2.7"
+
+# Use the new container infrastructure
+sudo: false    (1)
+
+# Install ansible
+addons:
+  apt:
+    packages:
+    - python-pip    (2)
+
+install:
+  # Install ansible
+  - pip install ansible
+
+  # Check ansible version
+  - ansible --version
+
+  # Create ansible.cfg with correct roles_path
+  - printf '[defaults]\nroles_path=../' >ansible.cfg    (3)
+
+script:    (4)
+  # Basic role syntax check
+  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+  # Run playbook in dry-run mode
+  - ansible-playbook tests/test.yml -i tests/inventory -C
+  # Run playbook
+  - ansible-playbook tests/test.yml -i tests/inventory
+
+notifications:    (5)
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

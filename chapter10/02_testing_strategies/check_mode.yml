@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Run under check mode and does falset make changes
+    command: echo 'check_mode is true'
+    check_mode: true
+    register: check_mode_true
+
+  - name: Debug check_mode is true
+    debug:
+      var: check_mode_true.stdout
+
+  - name: Make changes even in the check mode
+    command: echo 'check_mode is false'
+    check_mode: false
+    register: check_mode_false
+
+  - name: Debug check_mode is false
+    debug:
+      var: check_mode_false.stdout

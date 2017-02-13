@@ -1,0 +1,19 @@
+---
+- name: installed nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: changed default config nginx
+  copy:
+    src: "default.d/{{ item }}"
+    dest: "/etc/nginx/default.d/{{ item }}"
+  with_items:
+    - security.conf
+  notify: restarted service nginx
+
+- name: started and enabled service nginx
+  service:
+    name: nginx
+    state: started
+    enabled: true

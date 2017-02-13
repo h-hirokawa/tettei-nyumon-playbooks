@@ -1,0 +1,15 @@
+---
+
+- name: Create network interface
+  azure_rm_networkinterface:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    virtual_network_name: "{{ item.virtual_network_name }}"
+    subnet_name: "{{ item.subnet_name }}"
+    security_group_name: "{{ item.security_group_name }}"
+    public_ip_address_name: "{{ item.public_ip_address_name }}"
+    private_ip_allocation_method: "{{ item.private_ip_allocation_method }}"
+    private_ip_address: "{{ item.private_ip_address }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_network_interface }}"

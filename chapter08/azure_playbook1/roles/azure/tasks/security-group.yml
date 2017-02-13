@@ -1,0 +1,11 @@
+---
+
+- name: Create Security group
+  azure_rm_securitygroup:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    purge_rules: true
+    rules: "{{ item.rules }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_security_group }}"

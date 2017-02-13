@@ -1,0 +1,45 @@
+---
+- name: Facts about default VPC
+  ec2_vpc_net_facts:
+    filters:
+      isDefault: "true"
+  register: vpc_net_find
+
+- debug: var=vpc_net_find
+
+- name: Facts about default VPC subnet
+  ec2_vpc_subnet_facts:
+    filters:
+      vpc-id: "{{ vpc_net_find.vpcs[0].id}}"
+  register: vpc_subnet_find
+
+- debug: var=vpc_subnet_find
+
+- name: Search for the latest Amazon Linux AMI
+  ec2_ami_find:
+    name: "amzn-ami-hvm-*-gp2"
+    owner: amazon
+    architecture: x86_64
+    virtualization_type: hvm
+    sort: creationDate
+    sort_order: descending
+    sort_end: 1
+    no_result_action: fail
+  register: ami_find
+
+- debug: var=ami_find
+
+- name: Launch EC2 Instance
+  ec2:
+    image: "{{ ami_find.results[0].ami_id }}"
+    instance_type: "{{ ec2_instance_type }}"
+    key_name: "{{ ec2_key_name }}"
+    vpc_subnet_id: "{{ vpc_subnet_find.subnets[0].id }}"
+    group: "{{ ec2_group }}"
+    assign_public_ip: true
+    instance_tags:
+      Name: "{{ ec2_name }}"
+    count_tag: 
+      Name: "{{ ec2_name }}"
+    exact_count: 1
+    wait: true

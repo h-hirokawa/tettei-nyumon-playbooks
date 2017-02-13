@@ -1,0 +1,2 @@
+---
+- include: ec2.yml

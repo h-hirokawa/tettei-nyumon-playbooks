@@ -1,0 +1,30 @@
+---
+- name: Search for the latest Amazon Linux AMI
+  ec2_ami_find:
+    name: "amzn-ami-hvm-*-gp2"
+    owner: amazon
+    architecture: x86_64
+    virtualization_type: hvm
+    sort: creationDate
+    sort_order: descending
+    sort_end: 1
+    no_result_action: fail
+  register: ami_find
+
+- debug: var=ami_find
+
+- name: launch ansible cloudformation
+  cloudformation:
+    stack_name: ansible-cloudformation-{{ cloudformation_Environment }}
+    state: present
+    template: roles/cloudformation/files/cloudformation.json
+    template_parameters:
+      KeyName: "{{ cloudformation_KeyName }}"
+      SSHLocation: "{{ cloudformation_SSHLocation }}"
+      AMI: "{{ ami_find.results[0].ami_id }}"
+    tags:
+      stack: ansible-cloudformation
+      env: "{{ cloudformation_Environment }}"
+  register: output
+
+- debug: var=output

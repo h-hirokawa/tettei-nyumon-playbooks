@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Will be skipped in check mode
+    debug: 
+      msg: "Will be skipped in check mode"
+    when: not ansible_check_mode
+
+  - name: Ignore errors in check mode
+    fail:
+      msg: "Ignore errors in check mode"
+    ignore_errors: "{{ ansible_check_mode }}"

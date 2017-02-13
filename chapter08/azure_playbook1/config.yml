@@ -1,0 +1,6 @@
+---
+- hosts: role_web
+  become: true
+
+  roles:
+    - nginx

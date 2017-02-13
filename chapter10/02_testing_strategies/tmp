@@ -1,0 +1,22 @@
+
+PLAY [localhost] ***************************************************************
+
+TASK [Run under check mode and does falset make changes] ***********************
+[0;36mskipping: [localhost][0m
+
+TASK [Debug check_mode is true] ************************************************
+[0;32mok: [localhost] => {
+    "check_mode_true.stdout": "VARIABLE IS NOT DEFINED!"
+}[0m
+
+TASK [Make changes even in the check mode] *************************************
+[0;33mchanged: [localhost][0m
+
+TASK [Debug check_mode is false] ***********************************************
+[0;32mok: [localhost] => {
+    "check_mode_false.stdout": "check_mode is false"
+}[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=3   [0m [0;33mchanged=1   [0m unreachable=0    failed=0   
+

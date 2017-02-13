@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  connection: local
+  vars_prompt:
+    - name: "newStorageAccountName"
+      private: no
+    - name: "mysqlPassword"
+      private: no
+    - name: "adminUsername"
+      private: no
+    - name: "adminPassword"
+      private: no
+    - name: "dnsNameForPublicIP"
+      private: no
+  tasks:
+    - name: Create Azure Functions with template
+      azure_rm_deployment:
+        resource_group_name: ansible_dockertest
+        location: japaneast
+        template_link: "https://gist.githubusercontent.com/kaz29/6520397779bb4565cebe6e99aaf22826/raw/d2325704587af8864828723154936f1b8cc228cc/docker-wordpress-mysql.json"
+        parameters:
+          newStorageAccountName:
+            value: "{{ newStorageAccountName }}"
+          mysqlPassword:
+            value: "{{ mysqlPassword }}"
+          adminUsername:
+            value: "{{ adminUsername }}"
+          adminPassword:
+            value: "{{ adminPassword }}"
+          dnsNameForPublicIP:
+            value: "{{ dnsNameForPublicIP }}"
+        state: present
+

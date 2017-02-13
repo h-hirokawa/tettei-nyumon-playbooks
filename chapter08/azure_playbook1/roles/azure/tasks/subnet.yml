@@ -1,0 +1,11 @@
+---
+
+- name: Create subnet
+  azure_rm_subnet:
+    name: "{{ item.name }}"
+    virtual_network_name: "{{ item.virtual_network_name }}"
+    resource_group: "{{ item.resource_group }}"
+    address_prefix_cidr: "{{ item.address_prefix_cidr }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_subnet }}"

@@ -1,0 +1,9 @@
+# ansible/container.yml
+version: "1" (1)
+services: (2)
+  web: (3)
+    image: centos:7 (4)
+    ports: (5)
+      - "8080:80"
+    command: ['/usr/bin/dumb-init', 'nginx', '-c', '/etc/nginx/nginx.conf', "-g", "daemon off;"] (6)
+registries: {} (7)

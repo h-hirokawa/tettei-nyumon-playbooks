@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Create subnet of prod-public
+      os_subnet:
+        cloud: production
+        state: present
+        name:  prod-subnet-pub
+        network_name:  prod-public
+        cidr: 172.16.0.0/16
+        enable_dhcp: false
+    - name: Create subnet of prod-private
+      os_subnet:
+        cloud: production
+        state: present
+        name:  prod-subnet-priv
+        network_name: prod-private
+        cidr: 192.168.0.0/24
+        enable_dhcp: true
+        dns_nameservers:
+           - 8.8.8.8
+ 

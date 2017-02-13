@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - block:    (1)
+    - debug:
+        msg: 'i execute normally'
+    - command: /bin/false    (2)
+    - debug:    (3)
+        msg: 'i never execute, cause ERROR!'
+
+    rescue:    (4)
+    - debug:
+        msg: 'I caught an error'
+    - command: /bin/false
+    - debug:    (5)
+        msg: 'I also never execute :-('
+
+    always:    (6)
+    - debug:
+        msg: 'this always executes'

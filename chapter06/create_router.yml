@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Create router for prod-public network
+      os_router:
+        cloud: production
+        name: prod-router
+        state: present
+        network: prod-public
+        interfaces:
+          - prod-subnet-priv

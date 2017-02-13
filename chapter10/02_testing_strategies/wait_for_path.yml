@@ -1,0 +1,25 @@
+---
+- hosts: nhashimo
+  gather_facts: false
+  tasks:
+  - name: Stop httpd    (1)
+    systemd: 
+      name: httpd
+      state: stopped
+
+  - name: Wait until logging message appears    (2)
+    wait_for: 
+      path: /var/log/messages
+      search_regex: 'Stopped The Apache HTTP Server'
+
+  - name: Wait until pid file is removed    (3)
+    wait_for: 
+      path: /run/httpd/httpd.pid
+      state: absent
+
+  - name: Wait until port is stopped    (4)
+    wait_for: 
+      port: 80
+      host: "{{ ansible_ssh_host }}"
+      state: stopped
+      timeout: 10

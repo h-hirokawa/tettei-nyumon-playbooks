@@ -1,0 +1,78 @@
+---
+- hosts: localhost
+  connection: local
+  vars_prompt:
+    - name: "azure_resource_group_name"
+      private: no
+    - name: "azure_storage_account_name"
+      private: no
+  vars:
+    - azure_location: "japanwest"
+    - azure_virtual_network:
+      - name: "MyVNET"
+        resource_group: "{{ azure_resource_group_name }}"
+        address_prefix_cidr: "10.1.0.0/16"
+        state: present
+    - azure_subnet:
+      - name: Subnet
+        resource_group: "{{ azure_resource_group_name }}"
+        virtual_network_name: MyVNET
+        address_prefix_cidr: 10.1.0.0/24
+        state: present
+    - azure_public_ip:
+      - name: myPublicIP
+        resource_group: "{{ azure_resource_group_name }}"
+        allocation_method: Static
+        state: present
+    - azure_security_group:
+      - name: myNSG
+        resource_group: "{{ azure_resource_group_name }}"
+        rules:
+          - name: 'AllowSSH'
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 101
+            direction: Inbound
+          - name: 'AllowHTTP'
+            protocol: Tcp
+            destination_port_range: 80
+            access: Allow
+            priority: 102
+            direction: Inbound
+        state: present
+    - azure_network_interface:
+      - name: myVMNic
+        resource_group: "{{ azure_resource_group_name }}"
+        virtual_network_name: MyVNET
+        subnet_name: Subnet
+        security_group_name: myNSG
+        public_ip_address_name: myPublicIP
+        private_ip_allocation_method: Static
+        private_ip_address: 10.1.0.10
+        state: present
+    - azure_storage_account:
+      - name: "{{ azure_storage_account_name }}"
+        resource_group: "{{ azure_resource_group_name }}"
+        type: Standard_LRS
+        state: present
+    - azure_storage_container:
+      - name: vhds
+        resource_group: "{{ azure_resource_group_name }}"
+        storage_account_name: "{{ azure_storage_account_name }}"
+        state: present
+    - azure_virtual_machine:
+      - name: MyVM
+        resource_group: "{{ azure_resource_group_name }}"
+        vm_size: Standard_A0
+        storage_account: "{{ azure_storage_account_name }}"
+        storage_container_name: vhds
+        network_interfaces: myVMNic
+        admin_username: "azure-user"
+        image:
+          offer: UbuntuServer
+          publisher: Canonical
+          sku: '16.04.0-LTS'
+          version: latest
+  roles:
+    - azure

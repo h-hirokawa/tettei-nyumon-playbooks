@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  vars_prompt:
+    - name: "cloudformation_KeyName"
+      private: no
+    - name: "cloudformation_SSHLocation"
+      private: no
+    - name: "cloudformation_Environment"
+      private: no
+      default: "staging"
+  roles:
+    - { role: cloudformation, tags: [cf] }

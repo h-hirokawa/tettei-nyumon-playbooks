@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Retrieve public IP of your internet gateway    (1)
+    ipify_facts:
+
+  - name: Debug public IP of your internet gateway    (2)
+    debug:
+      msg: "{{ ipify_public_ip }}"
+
+  - name: Retrieve public IP of your internet gateway at JSONTest.com    (3)
+    uri:
+      url: http://ip.jsontest.com/
+      return_content: yes
+    register: jsontest
+
+  - block:
+    - name: Debug public IP of your internet gateway at JSONTest.com     (4)
+      debug:
+        msg: "{{ jsontest.content }}"
+  
+    - name: Confirm same public ip is recognized     (5)
+      fail:
+        msg: "Public ip is not retrieved or not the same"
+    when: "ipify_public_ip not in jsontest.content"

@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: reduce instances
+      os_server:
+        cloud: production
+        state: absent
+        timeout: 600
+        name: "{{ item }}"
+      with_items:
+        - www2
+        - www3
+        - www4
+        - www5

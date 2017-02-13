@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: This task always fails    (1)
+    command: /bin/false
+    register: fail_result
+    ignore_errors: true    (2)
+
+  - name: Debug message when failed    (3)
+    debug:
+      msg: "Debug message when failed"
+    when: fail_result.rc != 0
+
+  - name: Debug message when succeeded    (4)
+    debug:
+      msg: "Debug message when succeeded"
+    when: fail_result.rc == 0

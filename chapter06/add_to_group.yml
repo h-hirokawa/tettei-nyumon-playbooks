@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: add to group
+    os_user_group:
+      cloud: internal
+      user: testuser1
+      group: testers
+      state: present

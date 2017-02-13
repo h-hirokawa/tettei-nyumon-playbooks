@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: more instances
+      os_server:
+        cloud: production
+        state: present
+        timeout: 600
+        name: "{{ item }}"
+        image: 8335a68a-4cde-4337-965a-316d9cd58e42
+        key_name: default
+        security_groups: webserver
+        flavor: m3.small
+        nics:
+          - net-id:   5a0f8eec-85ca-4f1a-bc42-51946c9ac65b
+      with_items:
+        - www2
+        - www3
+        - www4
+        - www5

@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: remove user
+    os_user:
+      cloud: internal
+      name: testuser1
+      state: absent

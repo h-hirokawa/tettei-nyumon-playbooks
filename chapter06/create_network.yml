@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Create public network prod-public
+      os_network:
+        cloud: production
+        state: present
+        name:  prod-public
+        provider_network_type: vlan
+        external: true
+    - name: Create private network prod-private
+      os_network:
+        cloud: production
+        state: present
+        name:  prod-private
+        provider_network_type: vlan

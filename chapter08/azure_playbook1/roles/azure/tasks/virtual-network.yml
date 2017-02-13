@@ -1,0 +1,10 @@
+---
+
+- name: Create virtual network
+  azure_rm_virtualnetwork:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    address_prefixes_cidr: "{{ item.address_prefix_cidr }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_virtual_network }}"

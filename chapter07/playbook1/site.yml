@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  connection: local
+  vars_prompt:
+    - name: "ec2_name"
+      private: no
+    - name: "ec2_instance_type"
+      private: no
+      default: "t2.micro"
+    - name: "ec2_key_name"
+      private: no
+    - name: "ec2_group"
+      private: no
+      default: "default"
+  roles:
+    - { role: ec2, tags: [ec2] }

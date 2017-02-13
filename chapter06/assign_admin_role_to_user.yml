@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: assign admin role
+      os_user_role:
+        cloud: production
+        name: taro
+        state: present
+        role: admin
+        project: production

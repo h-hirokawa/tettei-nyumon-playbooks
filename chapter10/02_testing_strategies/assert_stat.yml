@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Retrieve facts    (1)
+    stat: 
+      path: /run/sshd.pid
+    register: p
+
+  - name: Determine if path exists and file size is more than 1 byte    (2)(3)
+    assert: 
+      that:
+        - p.stat.exists
+        - p.stat.size > 1

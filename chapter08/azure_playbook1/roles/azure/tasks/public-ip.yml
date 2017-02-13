@@ -1,0 +1,13 @@
+---
+
+- name: Create public ip address
+  azure_rm_publicipaddress:
+    name: "{{ item.name }}"
+    resource_group: "{{ item.resource_group }}"
+    allocation_method: "{{ item.allocation_method }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ azure_public_ip }}"
+  register: azure_public_ip_result
+
+- debug: var=azure_public_ip_result

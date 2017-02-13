@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Upload RHEL7 image
+    os_image:
+      name: RHEL7
+      container_format: bare
+      disk_format: qcow2
+      state: present
+      filename: rhel-guest-image-7.2-20160302.0.x86_64.qcow2
+      is_public: true
+      min_ram: 1024
+      min_disk: 10
+      properties:
+        cpu_arch: x86_64
+      timeout: 600

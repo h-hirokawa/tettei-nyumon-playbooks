@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - os_user:
+    cloud: internal
+    name: testuser1
+    state: absent

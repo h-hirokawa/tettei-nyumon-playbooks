@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    os_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+    os_username: "{{ lookup('env','OS_USERNAME') }}"
+    os_password: "{{ lookup('env','OS_PASSWORD') }}"
+    os_project_name: "{{ lookup('env','OS_TENANT_NAME') }}"
+    os_region_name: "{{ lookup('env','OS_REGION_NAME') }}"
+  tasks:
+    - name: create instance
+      os_server:
+        name: webserver
+        state: present
+        timeout: 600
+        image: 8335a68a-4cde-4337-965a-316d9cd58e42
+        key_name: default
+        security_groups: webserver
+        flavor: m1.small
+        nics:
+          - net-id:   5a0f8eec-85ca-4f1a-bc42-51946c9ac65b
+        meta:
+          hostname: deploy-by-ansible

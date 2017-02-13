@@ -1,0 +1,5 @@
+---
+- hosts: tag_role_web
+  become: true
+  roles:
+    - { role: nginx, tags: [nginx] }

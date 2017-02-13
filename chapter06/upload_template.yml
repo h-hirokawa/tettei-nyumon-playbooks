@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Upload cirros image
+    os_image:
+      name: cirros
+      container_format: bare
+      disk_format: qcow2
+      state: present
+      filename: cirros-0.3.4-x86_64-disk.img
+      is_public: true
+      properties:
+        cpu_arch: x86_64

@@ -1,0 +1,355 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "ansible-cloudformation",
+    "Mappings": {
+        "StackConfig": {
+            "Subnet1": {
+                "CIDR": "10.0.0.0/24"
+            },
+            "Subnet2": {
+                "CIDR": "10.0.1.0/24"
+            },
+            "VPC": {
+                "CIDR": "10.0.0.0/16"
+            }
+        }
+    },
+    "Parameters": {
+        "KeyName": {
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "SSHLocation": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "0.0.0.0/0",
+            "Description": "The IP address range that can be used to SSH to the EC2 instances",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        },
+        "AMI": {
+            "Type": "AWS::EC2::Image::Id"
+        }
+    },
+    "Resources": {
+        "VPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Fn::FindInMap": [
+                        "StackConfig",
+                        "VPC",
+                        "CIDR"
+                    ]
+                },
+                "EnableDnsHostnames": true,
+                "EnableDnsSupport": true,
+                "InstanceTenancy": "default"
+            }
+        },
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "RouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "Route": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+        "Subnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        0, {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::FindInMap": [
+                        "StackConfig",
+                        "Subnet1",
+                        "CIDR"
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "Subnet1RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet1"
+                }
+            }
+        },
+        "Subnet2": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        1, {
+                            "Fn::GetAZs": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ]
+                },
+                "CidrBlock": {
+                    "Fn::FindInMap": [
+                        "StackConfig",
+                        "Subnet2",
+                        "CIDR"
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "Subnet2RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet2"
+                }
+            }
+        },
+        "EC2Instance1": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "EC2InstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AMI"
+                },
+                "InstanceType": "t2.micro",
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "NetworkInterfaces": [{
+                    "AssociatePublicIpAddress": true,
+                    "DeviceIndex": 0,
+                    "GroupSet": [{
+                        "Ref": "EC2InstanceSecurityGroup"
+                    }],
+                    "SubnetId": {
+                        "Ref": "Subnet1"
+                    }
+                }],
+                "Tags": [{
+                    "Key": "role",
+                    "Value": "web"
+                }]
+            }
+        },
+        "EC2Instance2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "EC2InstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AMI"
+                },
+                "InstanceType": "t2.micro",
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "NetworkInterfaces": [{
+                    "AssociatePublicIpAddress": true,
+                    "DeviceIndex": 0,
+                    "GroupSet": [{
+                        "Ref": "EC2InstanceSecurityGroup"
+                    }],
+                    "SubnetId": {
+                        "Ref": "Subnet2"
+                    }
+                }],
+                "Tags": [{
+                    "Key": "role",
+                    "Value": "web"
+                }]
+            }
+        },
+        "EC2InstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Roles": [{
+                    "Ref": "EC2Role"
+                }]
+            }
+        },
+        "EC2InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable SSH access and HTTP access",
+                "SecurityGroupIngress": [{
+                    "CidrIp": {
+                        "Ref": "SSHLocation"
+                    },
+                    "FromPort": 22,
+                    "IpProtocol": "tcp",
+                    "ToPort": 22
+                }, {
+                    "FromPort": 80,
+                    "IpProtocol": "tcp",
+                    "SourceSecurityGroupId": {
+                        "Ref": "ElasticLoadBalancerSecurityGroup"
+                    },
+                    "ToPort": 80
+                }],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "EC2ManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [{
+                        "Action": [
+                            "ec2:DescribeInstances"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                            "*"
+                        ]
+                    }, {
+                        "Action": [
+                            "cloudwatch:PutMetricData"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                            "*"
+                        ]
+                    }, {
+                        "Action": [
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:DescribeLogStreams",
+                            "logs:PutLogEvents"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": [
+                            "*"
+                        ]
+                    }],
+                    "Version": "2012-10-17"
+                }
+            }
+        },
+        "EC2Role": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [{
+                        "Action": [
+                            "sts:AssumeRole"
+                        ],
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "ec2.amazonaws.com"
+                            ]
+                        }
+                    }],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [{
+                    "Ref": "EC2ManagedPolicy"
+                }]
+            }
+        },
+        "ElasticLoadBalancer": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties": {
+                "CrossZone": true,
+                "HealthCheck": {
+                    "HealthyThreshold": 3,
+                    "Interval": 30,
+                    "Target": "HTTP:80/",
+                    "Timeout": 5,
+                    "UnhealthyThreshold": 5
+                },
+                "Instances": [{
+                    "Ref": "EC2Instance1"
+                }, {
+                    "Ref": "EC2Instance2"
+                }],
+                "Listeners": [{
+                    "InstancePort": 80,
+                    "LoadBalancerPort": 80,
+                    "Protocol": "HTTP"
+                }],
+                "SecurityGroups": [{
+                    "Ref": "ElasticLoadBalancerSecurityGroup"
+                }],
+                "Subnets": [{
+                    "Ref": "Subnet1"
+                }, {
+                    "Ref": "Subnet2"
+                }]
+            }
+        },
+        "ElasticLoadBalancerSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable HTTP access",
+                "SecurityGroupIngress": [{
+                    "CidrIp": "0.0.0.0/0",
+                    "FromPort": 80,
+                    "IpProtocol": "tcp",
+                    "ToPort": 80
+                }],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        }
+    }
+}
