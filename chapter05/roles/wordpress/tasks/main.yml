@@ -35,7 +35,6 @@
         url: https://api.wordpress.org/secret-key/1.1/salt/
         return_content: true
       run_once: true
-      delegate_to: "{{ ansible_play_hosts[0] }}"
       register: get_unique_keys
   always:
     - name: 認証用ユニーク・キー情報を変数に設定
@@ -48,37 +47,40 @@
         content: "{{ wordpress_unique_keys }}"
         dest: "{{ wordpress_home }}/unique_keys"
 
-- name: Wordpress設定ファイルを配置
-  template:
-    src: wp-config.j2.php
-    dest: "{{ wordpress_home }}/wp-config.php"
-    owner: "{{ wordpress_user }}"
-    group: "{{ wordpress_group }}"
+    # Ansible 2.2.1 で発生するブロック中のalways節より下のタスクが実行されない問題に対応
+    - name: Wordpress設定ファイルを配置
+      template:
+        src: wp-config.j2.php
+        dest: "{{ wordpress_home }}/wp-config.php"
+        owner: "{{ wordpress_user }}"
+        group: "{{ wordpress_group }}"
 
-- name: PHP-FPM用設定ファイルを配置
-  template:
-    src: wordpress.fpm.j2.conf
-    dest: "{{ wordpress_php_fpm_config_dir }}/wordpress.conf"
-  notify:
-    - PHP-FPMを再起動
+    - name: PHP-FPM用設定ファイルを配置
+      template:
+        src: wordpress.fpm.j2.conf
+        dest: "{{ wordpress_php_fpm_config_dir }}/wordpress.conf"
+      notify:
+        - PHP-FPMを再起動
 
-- name: PHP-FPM設定ファイルをテスト
-  command: php-fpm -t
-  changed_when: false
+    - name: PHP-FPM設定ファイルをテスト
+      command: php-fpm -t
+      changed_when: false
 
-- name: Nginx用設定ファイルを配置
-  template:
-    src: wordpress.nginx.j2.conf
-    dest: "{{ wordpress_nginx_config_dir }}/wordpress.conf"
-  notify:
-    - Nginxサービスのリロード
+    - name: Nginx用設定ファイルを配置
+      template:
+        src: wordpress.nginx.j2.conf
+        dest: "{{ wordpress_nginx_config_dir }}/wordpress.conf"
+      notify:
+        - Nginxサービスのリロード
 
-- name: Nginx設定ファイルをテスト
-  command: nginx -t
-  changed_when: false
+    - name: Nginx設定ファイルをテスト
+      command: nginx -t
+      changed_when: false
 
-- name: FirewalldでWordpress稼働ポートを公開状態に設定
-  firewalld:
-    port: "{{ wordpress_port }}/tcp"
-    permanent: true
-    state: enabled
+    - name: FirewalldでWordpress稼働ポートを公開状態に設定
+      firewalld:
+        port: "{{ wordpress_port }}/tcp"
+        permanent: true
+        state: enabled
+      notify:
+        - Firewalldサービスの再起動
