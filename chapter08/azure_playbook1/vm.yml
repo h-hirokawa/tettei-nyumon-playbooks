@@ -64,7 +64,7 @@
     - azure_virtual_machine:
       - name: MyVM
         resource_group: "{{ azure_resource_group_name }}"
-        vm_size: Standard_A0
+        vm_size: Standard_B1ms
         storage_account: "{{ azure_storage_account_name }}"
         storage_container_name: vhds
         network_interfaces: myVMNic
@@ -72,7 +72,7 @@
         image:
           offer: UbuntuServer
           publisher: Canonical
-          sku: '16.04.0-LTS'
+          sku: '18.04-LTS'
           version: latest
   roles:
     - azure
